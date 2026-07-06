@@ -1,0 +1,15 @@
+Package: xref
+Type: Handles Cross-References across Quarto Documents
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Daniel", "Kaplan",
+      email = "dtkaplan@gmail.com",
+      role = c("aut", "cre")
+    )
+  )
+Description: A replacement for the Quarto @ referencing system that works across documents.
+License: All rights reserved
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
