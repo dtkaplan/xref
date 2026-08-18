@@ -13,9 +13,6 @@
 
 #' @name make_xf_index
 
-library("stringr")
-library("tibble")
-
 #' @param save Flag to save the index to a file. Only set to `FALSE` for debugging.
 #' @rdname make_xf_index
 #' @export
