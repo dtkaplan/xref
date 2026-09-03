@@ -11,20 +11,33 @@
 #' @export
 add_anchor_file <- function(fname = "XREFS.rda") {
 
+  if (!file.exists(fname)) {
+    fname <- paste0("../", fname) # check upstairs
+    if (!file.exists(fname)) {
+      fname <- paste0("../", fname) # check upstairs
+    }
+  }
+  if (!file.exists(fname)) stop("Can't find file XREFS.rda.")
   ext <- tools::file_ext(fname)
   if (ext == "rda") {
     load(fname)
-    newtable <- XREFS # just the default name
+    newtable <- XREFS
+  } else if (ext == "rds") {
+    newtable <- readRDS(fname)
   } else if (ext == "csv") {
     newtable <- readr::read_csv(fname)
   }
 
-  .anchor_table. <<- # Global var
-    dplyr::bind_rows(.anchor_table, newtable)
+  set_anchor_table(
+    dplyr::bind_rows(
+      get_anchor_table(), newtable)
+  )
 }
+
 
 #' @export
 add_anchor_url <- function(url) {
+  # Use add_anchor_file()
   # For a table stored at a URL or equivalent
 }
 #' @export

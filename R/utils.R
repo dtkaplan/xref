@@ -9,5 +9,3 @@ quarto_target <- function() {
   else NA
 }
 
-
-.anchor_table. <- tibble::tibble()

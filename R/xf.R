@@ -15,13 +15,13 @@
 #' @rdname xf
 #' @export
 xf <- function(id, just_number = FALSE, label = NULL) {
-  if (nrow(xf:::.anchor_table.) == 0) {
+  if (nrow(get_anchor_table()) == 0) {
     warning("No anchor tables loaded. See add_anchor_file().")
     return(paste("No xref anchor file given.", id))
   }
   id <- tolower(id)
   id <- gsub("^@", "", id) # Remove @ just in case it was used in the ID
-  this_one <- xf:::.anchor_table. |>
+  this_one <- get_anchor_table() |>
     filter(ID == id)
   text <- if (nrow(this_one) == 0) {
     paste("UNRESOLVED", id)
@@ -47,10 +47,12 @@ xf <- function(id, just_number = FALSE, label = NULL) {
 #' @rdname xf
 #' @export
 xf <- function(id, suppress_label = FALSE, label = NULL) {
-  if (!exists("XREFS")) load("XREFS.rda", envir = parent.frame(n = 2))
+  if (nrow(get_anchor_table()) == 0) {
+    stop("No anchor table available.")
+  }
   id <- tolower(id)
   id <- gsub("^@", "", id) # Remove @ just in case it was used in the ID
-  this_one <- XREFS |>
+  this_one <- get_anchor_table() |>
     filter(ID == id)
   text <- if (nrow(this_one) == 0) {
     paste("UNRESOLVED", id)
@@ -100,16 +102,18 @@ xf_definition <- function(word, text = word){
 xf_to_def <- function(word, label = word) {
   word <- tolower(word) # Just in case
   word <- gsub(" ", "-", word)
-  # if a label was given, use
-  xf(glue::glue("finger-{word}-definition"), label = label)
+  this <- get_anchor_table() |>
+    dplyr::filter(ID == word)
+  if (nrow(this) == 0)
+    return(glue::glue("**Unresolved definition word: {word}**"))
+  return(this[1, "link"])
 }
 
 #' @rdname xf
 #' @export
 xf_new_words <- function(chapter) {
-  if (!exists("XREFS")) load("XREFS.rda", envir = parent.frame(n = 2))
   chap_name <- glue::glue("Chap-{chapter}")
-  refs_in_chapter <- XREFS |> dplyr::filter(grepl(chap_name, file))
+  refs_in_chapter <- get_anchor_table() |> dplyr::filter(grepl(chap_name, file))
   definitions <- refs_in_chapter |>
     dplyr::filter(grepl("-definition", ID))
 
