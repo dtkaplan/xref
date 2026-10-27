@@ -38,18 +38,20 @@ xref_make_index <- function(htmlname) {
   Lines <- gsub("&nbsp;", "", Lines)
   for_reference <- gsub("docs/", "", htmlname)
   One <- xref_sections_find(Lines)
+  OneB <- xref_chapters_find(Lines)
   Two <- xref_figures_find(Lines)
   Three <- xref_exercises_find(Lines)
   Four <- xref_callouts_find(Lines)
   Five <- xref_fingers_find(Lines)
   Six <- xref_tables_find(Lines)
+  Seven <- xref_equations_find(Lines)
 
-  Res <- dplyr::bind_rows(One, Two, Three, Four, Five, Six)
+  Res <- dplyr::bind_rows(One, OneB, Two, Three, Four, Five, Six, Seven)
   Res$file <- for_reference
 
   Res$link <- with(Res, glue::glue("[{label}]({file}#{ID})"))
 
-  Res
+  Res |> dplyr::filter(!grepl("^NA", label))
 }
 
 #' @rdname make_xf_index
@@ -75,6 +77,36 @@ xref_fingers_find <- function(Lines) {
 
   tibble(label = labels, ID = IDs)
 }
+
+#' @rdname make_xf_index
+#' @export
+xref_chapters_find <- function(Lines) {
+  keepers <- grep("^<h1", Lines)
+  Section_lines <- Lines[keepers]
+  info <- extract_chapter_info(Section_lines[1])
+  Res <- tibble(label = paste("Chapter", info$chapter), ID = info$id)
+
+  Res
+}
+
+extract_chapter_info <- function(html_line) {
+  # Regex pattern using named capture groups: (?<name>regex)
+  pattern <- 'id="(?<id>[^"]+)".*?class="chapter-number">(?<chapter>\\d+)'
+
+  # Match the pattern against the input string
+  match <- str_match(html_line, pattern)
+
+  # Return a list with the extracted components
+  if (!is.na(match[1, 1])) {
+    return(list(
+      id = match[1, "id"],
+      chapter = as.numeric(match[1, "chapter"])
+    ))
+  } else {
+    return(list(id = NA, chapter = NA))
+  }
+}
+
 
 #' @rdname make_xf_index
 #' @export
@@ -143,6 +175,33 @@ xref_tables_find <- function(Lines) {
   #labels <- "Table"
 
   tibble(label = labels, ID = IDs)
+}
+
+#' @rdname make_xf_index
+#' @export
+
+xref_equations_find <- function(Lines) {
+  html <- paste(Lines, collapse = "\n")
+  pattern <- paste0(
+    '(?s)<span\\s+id\\s*=\\s*["\'](eq-[^"\']+)["\'][^>]*>',
+    '(?:(?!</span>).)*?\\\\tag\\s*\\{([0-9]+(?:\\.[0-9]+)*)\\}'
+  )
+  equations <- regmatches(html, gregexpr(pattern, html, perl = TRUE))[[1]]
+
+  if (!length(equations)) {
+    return(data.frame(label = character(), number = character()))
+  }
+
+  labels <- sub(
+    '(?s)^<span\\s+id\\s*=\\s*["\'](eq-[^"\']+)["\'][^>]*>.*$',
+    "\\1", equations, perl = TRUE
+  )
+  numbers <- sub(
+    '(?s)^.*\\\\tag\\s*\\{([0-9]+(?:\\.[0-9]+)*)\\}.*$',
+    "\\1", equations, perl = TRUE
+  )
+
+  tibble(label = paste("Math Expr", numbers), ID = labels)
 }
 
 #' @rdname make_xf_index

@@ -5,10 +5,12 @@
 \alias{xref_html_files}
 \alias{xref_make_index}
 \alias{xref_fingers_find}
+\alias{xref_chapters_find}
 \alias{xref_sections_find}
 \alias{xref_figures_find}
 \alias{xref_exercises_find}
 \alias{xref_tables_find}
+\alias{xref_equations_find}
 \alias{xref_callouts_find}
 \title{Make the XREFS.rda file}
 \usage{
@@ -18,6 +20,8 @@ xref_make_index(htmlname)
 
 xref_fingers_find(Lines)
 
+xref_chapters_find(Lines)
+
 xref_sections_find(Lines)
 
 xref_figures_find(Lines)
@@ -25,6 +29,8 @@ xref_figures_find(Lines)
 xref_exercises_find(Lines)
 
 xref_tables_find(Lines)
+
+xref_equations_find(Lines)
 
 xref_callouts_find(Lines)
 }

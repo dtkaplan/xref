@@ -22,7 +22,7 @@ xf <- function(id, just_number = FALSE, label = NULL) {
   id <- tolower(id)
   id <- gsub("^@", "", id) # Remove @ just in case it was used in the ID
   this_one <- get_anchor_table() |>
-    filter(ID == id)
+    dplyr::filter(ID == id)
   text <- if (nrow(this_one) == 0) {
     paste("UNRESOLVED", id)
   } else if (nrow(this_one) > 1) {
@@ -53,7 +53,7 @@ xf <- function(id, suppress_label = FALSE, label = NULL) {
   id <- tolower(id)
   id <- gsub("^@", "", id) # Remove @ just in case it was used in the ID
   this_one <- get_anchor_table() |>
-    filter(ID == id)
+    dplyr::filter(ID == id)
   text <- if (nrow(this_one) == 0) {
     paste("UNRESOLVED", id)
   } else {
